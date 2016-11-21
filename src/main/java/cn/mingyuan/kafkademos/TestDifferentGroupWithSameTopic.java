@@ -1,19 +1,17 @@
 package cn.mingyuan.kafkademos;
 
-import junit.framework.TestCase;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.log4j.PropertyConfigurator;
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Properties;
 
-public class TestDifferentGroupWithSameTopic extends TestCase {
+public class TestDifferentGroupWithSameTopic {
 
-    @Test
-    public void test() {
+    public static void main(String[] args) {
+
         PropertyConfigurator.configure("conf/log4j.properties");
         ConsumerThread consumerThread = new ConsumerThread("groupA", "g-A-1");
         ConsumerThread consumerThread2 = new ConsumerThread("groupB", "g-B-1");
