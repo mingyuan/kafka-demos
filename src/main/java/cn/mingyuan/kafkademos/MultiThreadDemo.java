@@ -11,7 +11,7 @@ import java.util.Properties;
 /**
  * 多线程读取同一个topic的数据，互不干扰
  */
-public class TestDifferentGroupWithSameTopic {
+public class MultiThreadDemo {
 
     public static void main(String[] args) {
         PropertyConfigurator.configure("conf/log4j.properties");

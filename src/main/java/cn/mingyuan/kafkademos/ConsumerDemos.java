@@ -11,8 +11,8 @@ import org.apache.log4j.PropertyConfigurator;
 
 import java.util.*;
 
-public class ConsumerTest {
-    private static final Logger LOGGER = Logger.getLogger(ConsumerTest.class);
+public class ConsumerDemos {
+    private static final Logger LOGGER = Logger.getLogger(ConsumerDemos.class);
 
     /**
      * auto offset committing<br>

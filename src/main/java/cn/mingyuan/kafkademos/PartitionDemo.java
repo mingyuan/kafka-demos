@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * \
+ * 测试分区数与消息多少之间的关系<br/>
+ * 结论：分区数不受消息数影响，即使一条消息都没有，分区数也是等于server.properties 文件中的num.partitions
  *
  * @author jiangmingyuan@myhaowai.com
  * @version 2016/11/22 18:43
  * @since jdk1.8
  */
-public class PartitionTest {
+public class PartitionDemo {
     /**
      * 测试分区数与消息多少之间的关系<br/>
      * 结论：分区数不受消息数影响，即使一条消息都没有，分区数也是等于server.properties 文件中的num.partitions

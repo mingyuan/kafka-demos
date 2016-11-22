@@ -1,23 +1,24 @@
 package cn.mingyuan.kafkademos;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.Cluster;
 import org.apache.log4j.PropertyConfigurator;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
-public class ProducerTest {
+/**
+ * 同一个key，分配到同一个分区中<b>
+ * 默认使用DefaultPartitioner进行分区
+ *
+ * @author jiangmingyuan@myhaowai.com
+ * @version 2016/11/22 18:29
+ * @see {@link org.apache.kafka.clients.producer.internals.DefaultPartitioner#partition(String, Object, byte[], Object, byte[], Cluster)}
+ * @since jdk1.8
+ */
+public class SameKeyPartitionDemo {
 
-    public static void main(String[] args) {
-        String topic = args[0];
-        //http://kafka.apache.org/0101/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html
-        PropertyConfigurator.configure("conf/log4j.properties");
+    public static void produceMessage(final String topic) {
         Properties props = new Properties();
         props.put("bootstrap.servers", "172.16.151.179:9092,172.16.151.179:9093,172.16.151.179:9094");//该地址是集群的子集，用来探测集群。参数中的域名没有ip地址好用，用域名有时会出现找不到leader的错误
 //        props.put("bootstrap.servers", "vm1:9092,vm1:9093,vm1:9094");//该地址是集群的子集，用来探测集群。
@@ -30,28 +31,19 @@ public class ProducerTest {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");// 序列化的方式，支持ByteArraySerializer或者StringSerializer
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
-        Producer<String, String> producer = new KafkaProducer<>(props);//thread-safe，建议一个jvm instance只启用一个Producer
-        System.out.println("producer init ok,begine sending message");
-        String identifier = " hello world~ great message broker coming~--2";
-        Collection<Integer> failed = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            System.out.println("i->" + i);
-            Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, Integer.toString(i), Integer.toString(i) + identifier));
-            try {
-                RecordMetadata recordMetadata = future.get();
-                System.out.println("recordMetadata->" + i + " partition= " + recordMetadata.partition());
-            } catch (InterruptedException e) {
-                //if the send thread was interrupted while waiting
-                System.out.println(i + " InterruptedException " + e.getMessage());
-                failed.add(i);
-            } catch (ExecutionException e) {
-                System.out.println(i + " ExecutionException message delivery may failed " + e.getMessage());
-                failed.add(i);
-            }
+        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
+        for (int i = 0; i < 10; i++) {
+            producer.send(new ProducerRecord<String, String>(topic, "main-key", "main-value-" + i));
         }
-        System.out.println("message all sent!");
 
         producer.close();
-        System.out.println("producer closed.");
+    }
+
+    public static void main(String[] args) {
+        PropertyConfigurator.configure("conf/log4j.properties");
+        final String topic = "test-same-key";
+        produceMessage(topic);
+        System.out.println("----------------------------------------------------------------");
+        ConsumerDemos.getALL(topic);
     }
 }
