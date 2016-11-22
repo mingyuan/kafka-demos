@@ -91,7 +91,7 @@ public class ConsumerTest {
     /**
      * 一次性读取指定topic的所有分区里面的所有数据
      */
-    private static void getALL(final String topic) {
+    public static void getALL(final String topic) {
         Properties props = new Properties();
         props.put("bootstrap.servers", "172.16.151.179:9092");
         props.put("group.id", "test");
@@ -122,11 +122,11 @@ public class ConsumerTest {
 
     public static void main(String[] args) {
         PropertyConfigurator.configure("conf/log4j.properties");
-        final String topic = "my-topic11";
+        final String topic = "my-topic112300";
 //        autoOffsetCommitting(topic);
-//        ProducerTest.main(new String[]{topic});
-        manualOffsetControl(topic);
-        //getALL(topic);
+
+//        manualOffsetControl(topic);
+        getALL(topic);
         //System.out.printf("a-%ne-b");
     }
 }
