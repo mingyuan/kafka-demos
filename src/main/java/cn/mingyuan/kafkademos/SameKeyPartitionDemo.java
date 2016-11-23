@@ -33,7 +33,7 @@ public class SameKeyPartitionDemo {
 
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
         for (int i = 0; i < 10; i++) {
-            producer.send(new ProducerRecord<String, String>(topic, "main-key", "main-value-" + i));
+            producer.send(new ProducerRecord<String, String>(topic, "generateMessage-key", "generateMessage-value-" + i));
         }
 
         producer.close();

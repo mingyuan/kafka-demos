@@ -59,7 +59,7 @@ public class PartitionDemo {
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
-        producer.send(new ProducerRecord<String, String>(topic, "main-key", "main-value"));
+        producer.send(new ProducerRecord<String, String>(topic, "generateMessage-key", "generateMessage-value"));
 
         producer.close();
     }

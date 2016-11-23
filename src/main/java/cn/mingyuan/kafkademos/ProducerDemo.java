@@ -14,8 +14,7 @@ import java.util.concurrent.Future;
 
 public class ProducerDemo {
 
-    public static void main(String[] args) {
-        String topic = args[0];
+    public static void generateMessage(String topic) {
         //http://kafka.apache.org/0101/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html
         PropertyConfigurator.configure("conf/log4j.properties");
         Properties props = new Properties();

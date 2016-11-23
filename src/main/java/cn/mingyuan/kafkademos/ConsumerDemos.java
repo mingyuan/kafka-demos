@@ -95,7 +95,7 @@ public class ConsumerDemos {
         Properties props = new Properties();
         props.put("bootstrap.servers", "172.16.151.179:9092");
         props.put("group.id", "test");
-        props.put("enable.auto.commit", "true");
+        props.put("enable.auto.commit", "false");
         props.put("auto.commit.interval.ms", "1000");
         props.put("session.timeout.ms", "30000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
@@ -109,10 +109,17 @@ public class ConsumerDemos {
                 TopicPartition topicPartition = new TopicPartition(topic, e.partition());
                 consumer.assign(Arrays.asList(topicPartition));//为consumer分配分区
                 consumer.commitSync(Collections.singletonMap(topicPartition, new OffsetAndMetadata(0)));//设置从offset=0开始读取
-                ConsumerRecords<String, String> records = consumer.poll(Integer.MAX_VALUE);//获取所有数据
-                int count = 1;
-                for (ConsumerRecord<String, String> record : records) {
-                    LOGGER.info(String.format("%d partition=%s offset=%s  key=%s value=%s", count++, record.partition(), record.offset(), record.key(), record.value()));
+                while (true){
+                    ConsumerRecords<String, String> records = consumer.poll(1000);
+                    System.out.println("---------------------------------------------------------------------------");
+                    //poll方法并不保证一次获取完所有数据，因此要循环取数据直到没有数据为止，才算取完。
+                    if(records.count()==0){
+                        break;
+                    }
+                    int count = 1;
+                    for (ConsumerRecord<String, String> record : records) {
+                        LOGGER.info(String.format("%d partition=%s offset=%s  key=%s value=%s", count++, record.partition(), record.offset(), record.key(), record.value()));
+                    }
                 }
             });
         }
@@ -122,7 +129,8 @@ public class ConsumerDemos {
 
     public static void main(String[] args) {
         PropertyConfigurator.configure("conf/log4j.properties");
-        final String topic = "my-topic112300";
+        final String topic = "offset-test100";
+//        ProducerDemo.generateMessage(topic);
 //        autoOffsetCommitting(topic);
 
 //        manualOffsetControl(topic);
