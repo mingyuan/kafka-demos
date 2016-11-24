@@ -3,11 +3,13 @@ package cn.mingyuan.kafkademos;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author jiangmingyuan@myhaowai.com
@@ -17,7 +19,7 @@ import java.util.*;
 public class OffsetCommitDemo {
 
     public static void test(final String topic) {
-        KafkaConsumer<String, String> consumer = ConsumerUtils.getManualCommitConsumer("test-commit33", "test.i313d");
+        KafkaConsumer<String, String> consumer = ConsumerUtils.getManualCommitConsumer("test-commit331", "test.i313d");
 
         List<PartitionInfo> partitionInfos = consumer.partitionsFor(topic);
         Collection<TopicPartition> topicPartitions = new ArrayList<>(partitionInfos.size());
@@ -31,8 +33,11 @@ public class OffsetCommitDemo {
         }
 
         int count = 1;
+        boolean set = true;
         while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(1000);
+            long position = consumer.position(new TopicPartition(topic, 0));
+            System.out.println("partition 0 position=" + position);
+            ConsumerRecords<String, String> records = consumer.poll(1000);//会自动增长offset
             if (records.count() == 0) {//没有数据就停止，因为是测试，所以不等待producer发数据
                 continue;
             }
@@ -43,17 +48,22 @@ public class OffsetCommitDemo {
                 for (ConsumerRecord<String, String> consumerRecord : recordList) {
                     System.out.println(String.format("%d, partition= %d, offset= %d, key=%s, value=%s", count++, consumerRecord.partition(), consumerRecord.offset(), consumerRecord.key(), consumerRecord.value()));
                 }
-                OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(recordList.get(recordList.size() - 1).offset() + 1);
-                System.out.println(String.format("commit-> partition=%d, next-offset=%d", partition.partition(), offsetAndMetadata.offset()));
-                consumer.commitSync(Collections.singletonMap(new TopicPartition(topic, partition.partition()), offsetAndMetadata));
+                long offset = recordList.get(recordList.size() - 1).offset();
+                System.out.println(String.format("partition=%d, next-offset=%d", partition.partition(), offset));
+                //存储到kafka之外，用于故障恢复
+                store(partition.partition(), offset);
             }
+            consumer.commitSync();
         }
+    }
+
+    private static void store(int partition, long offset) {
     }
 
     public static void main(String[] args) {
         System.out.println("version=3");
-        String topic = "offset-test999990";
-        ProducerDemo.generateMessage(topic);
-//        test(topic);
+        String topic = "offset-test9999901";
+//        ProducerDemo.generateMessage(topic);
+        test(topic);
     }
 }

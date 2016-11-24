@@ -4,7 +4,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.log4j.PropertyConfigurator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +15,7 @@ public class ProducerDemo {
 
     public static void generateMessage(String topic) {
         //http://kafka.apache.org/0101/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html
-        PropertyConfigurator.configure("conf/log4j.properties");
+//        PropertyConfigurator.configure("conf/log4j.properties");
         Properties props = new Properties();
         props.put("bootstrap.servers", "172.16.151.179:9092,172.16.151.179:9093,172.16.151.179:9094");//该地址是集群的子集，用来探测集群。参数中的域名没有ip地址好用，用域名有时会出现找不到leader的错误
 //        props.put("bootstrap.servers", "vm1:9092,vm1:9093,vm1:9094");//该地址是集群的子集，用来探测集群。
@@ -31,10 +30,10 @@ public class ProducerDemo {
 
         Producer<String, String> producer = new KafkaProducer<>(props);//thread-safe，建议一个jvm instance只启用一个Producer
         System.out.println("producer init ok,begine sending message");
-        String identifier = " hello world~ great message broker coming~--2";
+        String identifier = " hello world~ great message broker coming~--3";
         Collection<Integer> failed = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            System.out.println("i->" + i);
+//            System.out.println("i->" + i);
             Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, Integer.toString(i), Integer.toString(i) + identifier));
             try {
                 RecordMetadata recordMetadata = future.get();
@@ -52,5 +51,10 @@ public class ProducerDemo {
 
         producer.close();
         System.out.println("producer closed.");
+    }
+
+    public static void main(String[] args) {
+        String topic = "1000";
+        generateMessage(topic);
     }
 }

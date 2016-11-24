@@ -131,7 +131,7 @@ public class ConsumerDemos {
 
     public static void main(String[] args) {
         PropertyConfigurator.configure("conf/log4j.properties");
-        final String topic = "offset-test100";
+        final String topic = "test-of-offset-with-group-1479984023578";
 //        ProducerDemo.generateMessage(topic);
 //        autoOffsetCommitting(topic);
 
