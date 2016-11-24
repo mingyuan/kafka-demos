@@ -44,7 +44,7 @@ public class ConsumerDemos {
     /**
      * 手动设置offset方式读取数据。use-case：获取一批数据-处理-标记完成（commitSync）
      * <br>
-     * 若配合consumer.commitSync(offsetAndMetadataMap);方法，将offset设置为0，那么就可以从头读取到所有的数据
+     * 若配合seek;方法，将offset设置为0，那么就可以从头读取到所有的数据
      */
     private static void manualOffsetControl(final String topic) {
         Properties props = new Properties();
@@ -58,21 +58,23 @@ public class ConsumerDemos {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList(topic));//订阅topic
         List<PartitionInfo> partitionInfos = consumer.partitionsFor(topic);//获取topic的分区信息
 
         //设置所有分区的offset为从0开始
-        Map<TopicPartition, OffsetAndMetadata> offsetAndMetadataMap = new HashMap<>();
+        Collection<TopicPartition> list = new ArrayList<>(partitionInfos.size());
         for (PartitionInfo partitionInfo : partitionInfos) {
-            TopicPartition topicPartition = new TopicPartition(topic, partitionInfo.partition());
-            OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(0);
-            offsetAndMetadataMap.put(topicPartition, offsetAndMetadata);
+            list.add(new TopicPartition(topic, partitionInfo.partition()));
         }
-        consumer.commitSync(offsetAndMetadataMap);
+        consumer.assign(list);
+
+        for (TopicPartition topicPartition : list) {
+            consumer.seek(topicPartition, 0);
+        }
 
         try {
             while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(Long.MAX_VALUE);//设置为LONG.MAX_VALUE目的是一直等待，直到获取到数据
+                //获取消息，如果kafka中有消息，则本方法每次调用均可获取到消息，但是每次获取的消息条数不定，直到把消息消费完毕
+                ConsumerRecords<String, String> records = consumer.poll(1000);
                 for (TopicPartition partition : records.partitions()) {
                     List<ConsumerRecord<String, String>> partitionRecords = records.records(partition);
                     int count = 1;
@@ -109,11 +111,11 @@ public class ConsumerDemos {
                 TopicPartition topicPartition = new TopicPartition(topic, e.partition());
                 consumer.assign(Arrays.asList(topicPartition));//为consumer分配分区
                 consumer.commitSync(Collections.singletonMap(topicPartition, new OffsetAndMetadata(0)));//设置从offset=0开始读取
-                while (true){
+                while (true) {
                     ConsumerRecords<String, String> records = consumer.poll(1000);
                     System.out.println("---------------------------------------------------------------------------");
                     //poll方法并不保证一次获取完所有数据，因此要循环取数据直到没有数据为止，才算取完。
-                    if(records.count()==0){
+                    if (records.count() == 0) {
                         break;
                     }
                     int count = 1;
@@ -133,8 +135,8 @@ public class ConsumerDemos {
 //        ProducerDemo.generateMessage(topic);
 //        autoOffsetCommitting(topic);
 
-//        manualOffsetControl(topic);
-        getALL(topic);
+        manualOffsetControl(topic);
+//        getALL(topic);
         //System.out.printf("a-%ne-b");
     }
 }

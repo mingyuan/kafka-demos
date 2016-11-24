@@ -1,7 +1,8 @@
 package cn.mingyuan.kafkademos;
 
 /**
- * kafka的一些备忘，后后期转义到MD中
+ * kafka的一些备忘，后后期转移到README.md中
+ *
  * @author jiangmingyuan@myhaowai.com
  * @version 2016/11/22 14:54
  * @since jdk1.8
@@ -71,12 +72,11 @@ public class Memos {
     /**
      * Kafka在Zookeeper中动态维护了一个ISR（in-sync replicas） set，
      * 这个set里的所有replica都跟上了leader，只有ISR里的成员才有被选为leader的可能。
-     * 在这种模式下，对于f+1个replica(leader and follower)，一个Kafka topic能在保证不丢失已经commit的消息的前提下容忍f个replica的失败。
+     * For a topic with replication factor N, we will tolerate up to N-1 server failures without losing any records committed to the log.
      */
     public void redundancy() {
-        //保证f+1节点可用即可
-        //f为副本数 default.replication.factor    default replication factors for automatically created topics  default 1
-
+        //如果复制因子为N，那么最多容忍N-1个节点失效
+        // http://kafka.apache.org/documentation#intro_guarantees
     }
 
     public static void main(String[] args) {
