@@ -10,10 +10,13 @@ import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProducerDemo {
+    private static AtomicInteger seq = new AtomicInteger(1);
 
-    public static void generateMessage(String topic) {
+    public static void generateMessage(String topic, String appendmessage) {
         //http://kafka.apache.org/0101/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html
 //        PropertyConfigurator.configure("conf/log4j.properties");
         Properties props = new Properties();
@@ -30,11 +33,12 @@ public class ProducerDemo {
 
         Producer<String, String> producer = new KafkaProducer<>(props);//thread-safe，建议一个jvm instance只启用一个Producer
         System.out.println("producer init ok,begine sending message");
-        String identifier = " hello world~ great message broker coming~--3";
         Collection<Integer> failed = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
 //            System.out.println("i->" + i);
-            Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, Integer.toString(i), Integer.toString(i) + identifier));
+            String value = String.format("批次=%s, 总序号=%s", appendmessage, seq.getAndIncrement());
+
+            Future<RecordMetadata> future = producer.send(new ProducerRecord<>(topic, Integer.toString(i), value));
             try {
                 RecordMetadata recordMetadata = future.get();
                 System.out.println("recordMetadata->" + i + " partition= " + recordMetadata.partition());
@@ -46,6 +50,7 @@ public class ProducerDemo {
                 System.out.println(i + " ExecutionException message delivery may failed " + e.getMessage());
                 failed.add(i);
             }
+            producer.flush();
         }
         System.out.println("message all sent!");
 
@@ -53,8 +58,11 @@ public class ProducerDemo {
         System.out.println("producer closed.");
     }
 
-    public static void main(String[] args) {
-        String topic = "1000";
-        generateMessage(topic);
+    public static void main(String[] args) throws InterruptedException {
+        String topic = "googleearch-1";
+        for (int i = 0; i < 10; i++) {
+            ProducerDemo.generateMessage(topic, " append -> " + i);
+            TimeUnit.SECONDS.sleep(5);
+        }
     }
 }

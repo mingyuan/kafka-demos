@@ -19,6 +19,7 @@ public class OffsetSubmitTest extends Thread {
     private boolean second;
     private KafkaConsumer<String, String> consumer;
 
+
     public OffsetSubmitTest(final String groupName, final String clientId, final String topic, final boolean second) {
         this.groupName = groupName;
         this.clientId = clientId;
@@ -44,9 +45,9 @@ public class OffsetSubmitTest extends Thread {
         }
         System.out.println(getName() + " begin process");
         int count = 0;
-        for (int i = 0; i < 50; i++) {
+        while (true) {
             ConsumerRecords<String, String> records = consumer.poll(100);
-            System.out.println(getName() + " records got size=" + records.count());
+//            System.out.println(getName() + " records got size=" + records.count());
             for (ConsumerRecord<String, String> record : records) {
                 System.out.println(String.format("thread=%s, partition=%s,offset=%s,key=%s,value=%s", getName(), record.partition(), record.offset(), record.key(), record.value()));
             }
@@ -60,16 +61,18 @@ public class OffsetSubmitTest extends Thread {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        String topic = "1000200";// + System.currentTimeMillis();
+        String topic = "googleearch-1";// + System.currentTimeMillis();
         System.out.println(topic);
-
-        OffsetSubmitTest t1 = new OffsetSubmitTest("group-1225454742", "client-1", topic, false);
-//        OffsetSubmitTest t2 = new OffsetSubmitTest("group-1", "client-2", topic, true);
-        t1.start();
-//        t2.start();
-        TimeUnit.SECONDS.sleep(5);
-        ProducerDemo.generateMessage(topic);
-        t1.join();
-//        t2.join();
+        String groupName = "group-1";
+        String clientName = "client-"+System.currentTimeMillis()+"-";
+        for (int i = 1; i < 2; i++) {
+            OffsetSubmitTest t1 = new OffsetSubmitTest(groupName, clientName + i, topic, false);
+            t1.start();
+        }
+//        TimeUnit.SECONDS.sleep(10);
+//        for (int i = 1; i < 11; i++) {
+//            ProducerDemo.generateMessage(topic, String.valueOf(i));
+//            TimeUnit.SECONDS.sleep(5);
+//        }
     }
 }

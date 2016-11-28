@@ -63,7 +63,7 @@ public class OffsetCommitDemo {
     public static void main(String[] args) {
         System.out.println("version=3");
         String topic = "offset-test9999901";
-//        ProducerDemo.generateMessage(topic);
+        ProducerDemo.generateMessage(topic,"nul");
         test(topic);
     }
 }
